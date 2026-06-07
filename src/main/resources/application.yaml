@@ -1,0 +1,17 @@
+spring:
+  main:
+    lazy-initialization: true
+  application:
+    port: 8080
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: 8080

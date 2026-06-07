@@ -1,0 +1,1 @@
+CREATE TYPE case_status AS ENUM ('NEW', 'ACTIVE', 'ONHOLD', 'CLOSED');
