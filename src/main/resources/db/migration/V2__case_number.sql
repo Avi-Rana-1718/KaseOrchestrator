@@ -1,0 +1,1 @@
+ALTER TABLE cases ADD COLUMN case_number VARCHAR(50);
