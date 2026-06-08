@@ -12,7 +12,9 @@ target/
 *.iws
 *.iml
 *.ipr
-.idea
+.idea/encodings.xml
+.idea/google-java-format.xml
+.idea/vcs.xml
 
 ### Eclipse ###
 .apt_generated

@@ -18,5 +18,6 @@ public class CustomerRef {
   @Column(name = "owner_type", nullable = false)
   private OwnerType owner_type;
 
+  @Column(name = "owner_value", nullable = false)
   private String owner_value;
 }

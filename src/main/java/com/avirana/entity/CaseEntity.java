@@ -15,7 +15,7 @@ import lombok.Setter;
 @Table(name = "cases")
 public class CaseEntity extends BaseEntity {
 
-  @Column(name = "case_number", nullable = false)
+  @Column(name = "case_number", nullable = false, unique = true, updatable = false)
   private String caseNumber;
 
   @Column(name = "subject", nullable = false)

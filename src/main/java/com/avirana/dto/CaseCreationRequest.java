@@ -7,4 +7,5 @@ public class CaseCreationRequest {
   String subject;
   String caseType;
   String subType;
+  String caseNumber;
 }

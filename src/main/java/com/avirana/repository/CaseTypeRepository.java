@@ -7,10 +7,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CaseTypeRepository extends JpaRepository<CaseTypeEntity, Integer> {
-  List<CaseTypeEntity> findAllByOrgAndIsActiveTrueAndIsSubtype(String org, Boolean subtype);
+  List<CaseTypeEntity> findAllByOrgAndIsSubtypeAndIsActiveTrue(String org, Boolean subtype);
 
-  CaseTypeEntity findByNameAndOrgAndIsSubtype(String name, String org, Boolean isSubtype);
+  CaseTypeEntity findByOrgAndNameAndIsSubtype(String name, String org, Boolean isSubtype);
 
-  CaseTypeEntity findByNameAndIsSubtypeAndOrgAndIsActiveTrue(
-      String name, Boolean isSubType, String org);
+  CaseTypeEntity findByOrgAndNameAndIsSubtypeAndIsActiveTrue(
+      String org, String name, Boolean isSubType);
 }

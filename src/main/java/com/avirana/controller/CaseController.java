@@ -3,6 +3,7 @@ package com.avirana.controller;
 import com.avirana.dto.CaseCreationRequest;
 import com.avirana.dto.CaseTypeUpsertRequest;
 import com.avirana.dto.XUserDetails;
+import com.avirana.entity.CaseEntity;
 import com.avirana.service.CaseService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -28,22 +30,24 @@ public class CaseController {
 
   private final CaseService caseService;
 
+  private static final String XUserDetails = "X-User-Details";
+
   @GetMapping("/types")
   public ResponseEntity<List<String>> getCaseTypes(
-      @NotNull @RequestHeader("X-User-Details") XUserDetails userDetails) {
+      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails) {
     return ResponseEntity.ok(caseService.getAllCaseType(userDetails, false));
   }
 
   @GetMapping("/subtypes")
   public ResponseEntity<List<String>> getSubTypes(
-      @NotNull @RequestHeader("X-User-Details") XUserDetails userDetails) {
+      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails) {
     return ResponseEntity.ok(caseService.getAllCaseType(userDetails, true));
   }
 
   @PutMapping("/upsertType")
   public ResponseEntity<String> createCaseType(
       @Valid @RequestBody CaseTypeUpsertRequest request,
-      @NotNull @RequestHeader("X-User-Details") XUserDetails userDetails) {
+      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(caseService.upsertCaseType(request, userDetails));
   }
@@ -51,9 +55,18 @@ public class CaseController {
   @PostMapping("/caseCreation")
   public ResponseEntity<String> caseCreation(
       @Valid @RequestBody CaseCreationRequest request,
-      @NotNull @RequestHeader("X-User-Details") XUserDetails userDetails)
+      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails)
       throws BadRequestException {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(caseService.createCase(request, userDetails));
+  }
+
+  @GetMapping("/details")
+  public ResponseEntity<CaseEntity> getCaseDetails(
+      @RequestParam("caseNumber") String caseNumber,
+      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails)
+      throws BadRequestException {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(this.caseService.getCaseDetails(caseNumber, userDetails));
   }
 }

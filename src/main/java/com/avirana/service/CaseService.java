@@ -11,6 +11,7 @@ import com.avirana.repository.CaseTypeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class CaseService {
 
   public List<String> getAllCaseType(XUserDetails userDetails, Boolean subType) {
     List<CaseTypeEntity> typeEntityList =
-        caseTypeRepository.findAllByOrgAndIsActiveTrueAndIsSubtype(userDetails.getOrg(), subType);
+        caseTypeRepository.findAllByOrgAndIsSubtypeAndIsActiveTrue(userDetails.getOrg(), subType);
     List<String> typeList = new ArrayList<>();
 
     typeEntityList.forEach(
@@ -37,8 +38,8 @@ public class CaseService {
 
   public String upsertCaseType(CaseTypeUpsertRequest request, XUserDetails userDetails) {
     CaseTypeEntity typeEntity =
-        caseTypeRepository.findByNameAndOrgAndIsSubtype(
-            request.getName(), userDetails.getOrg(), request.getIsSubtype());
+        caseTypeRepository.findByOrgAndNameAndIsSubtype(
+            userDetails.getOrg(), request.getName(), request.getIsSubtype());
 
     if (Objects.isNull(typeEntity)) {
       typeEntity = new CaseTypeEntity();
@@ -54,6 +55,17 @@ public class CaseService {
     return "Upserted case type master";
   }
 
+  public CaseEntity getCaseDetails(String caseNumber, XUserDetails userDetails)
+      throws BadRequestException {
+    CaseEntity caseEntity =
+        caseRepository.findOneByCaseNumberAndOrgAndIsActiveTrue(caseNumber, userDetails.getOrg());
+
+    if (Objects.isNull(caseEntity))
+      throw new BadRequestException("No case with mentioned id exists.");
+
+    return caseEntity;
+  }
+
   public String createCase(CaseCreationRequest request, XUserDetails userDetails)
       throws BadRequestException {
 
@@ -61,6 +73,8 @@ public class CaseService {
     String caseType = request.getCaseType();
     String subject = request.getSubject();
     String subType = request.getSubType();
+    String caseNumber =
+        Objects.nonNull(request.getCaseNumber()) ? request.getCaseNumber() : generateCaseNumber();
 
     validateTypeAndSubtype(caseType, subType, org);
 
@@ -69,23 +83,28 @@ public class CaseService {
     caseEntity.setStatus(CaseStatusEnum.NEW);
     caseEntity.setSubject(subject);
     caseEntity.setType(caseType);
+    caseEntity.setCaseNumber(caseNumber);
     caseEntity.setSubType(subType);
 
     caseEntity = caseRepository.save(caseEntity);
 
-    return "Created case with ID: " + caseEntity.getId();
+    return "Created case with number: " + caseEntity.getCaseNumber();
   }
 
   private void validateTypeAndSubtype(String type, String subType, String org)
       throws BadRequestException {
     if (Objects.isNull(
-        caseTypeRepository.findByNameAndIsSubtypeAndOrgAndIsActiveTrue(type, false, org))) {
+        caseTypeRepository.findByOrgAndNameAndIsSubtypeAndIsActiveTrue(org, type, false))) {
       throw new BadRequestException("CaseType is not valid");
     }
 
     if (Objects.isNull(
-        caseTypeRepository.findByNameAndIsSubtypeAndOrgAndIsActiveTrue(subType, true, org))) {
+        caseTypeRepository.findByOrgAndNameAndIsSubtypeAndIsActiveTrue(org, subType, true))) {
       throw new BadRequestException("SubType is not valid");
     }
+  }
+
+  private String generateCaseNumber() {
+    return "KS-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
   }
 }
