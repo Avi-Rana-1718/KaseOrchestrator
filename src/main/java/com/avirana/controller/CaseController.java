@@ -1,5 +1,6 @@
 package com.avirana.controller;
 
+import com.avirana.constants.CommonHeaders;
 import com.avirana.dto.CaseCreationRequest;
 import com.avirana.dto.CaseTypeUpsertRequest;
 import com.avirana.dto.XUserDetails;
@@ -30,24 +31,22 @@ public class CaseController {
 
   private final CaseService caseService;
 
-  private static final String XUserDetails = "X-User-Details";
-
   @GetMapping("/types")
   public ResponseEntity<List<String>> getCaseTypes(
-      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails) {
+      @NotNull @RequestHeader(CommonHeaders.XUserDetails) XUserDetails userDetails) {
     return ResponseEntity.ok(caseService.getAllCaseType(userDetails, false));
   }
 
   @GetMapping("/subtypes")
   public ResponseEntity<List<String>> getSubTypes(
-      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails) {
+      @NotNull @RequestHeader(CommonHeaders.XUserDetails) XUserDetails userDetails) {
     return ResponseEntity.ok(caseService.getAllCaseType(userDetails, true));
   }
 
   @PutMapping("/upsertType")
   public ResponseEntity<String> createCaseType(
       @Valid @RequestBody CaseTypeUpsertRequest request,
-      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails) {
+      @NotNull @RequestHeader(CommonHeaders.XUserDetails) XUserDetails userDetails) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(caseService.upsertCaseType(request, userDetails));
   }
@@ -55,7 +54,7 @@ public class CaseController {
   @PostMapping("/caseCreation")
   public ResponseEntity<String> caseCreation(
       @Valid @RequestBody CaseCreationRequest request,
-      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails)
+      @NotNull @RequestHeader(CommonHeaders.XUserDetails) XUserDetails userDetails)
       throws BadRequestException {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(caseService.createCase(request, userDetails));
@@ -64,7 +63,7 @@ public class CaseController {
   @GetMapping("/details")
   public ResponseEntity<CaseEntity> getCaseDetails(
       @RequestParam("caseNumber") String caseNumber,
-      @NotNull @RequestHeader(XUserDetails) XUserDetails userDetails)
+      @NotNull @RequestHeader(CommonHeaders.XUserDetails) XUserDetails userDetails)
       throws BadRequestException {
     return ResponseEntity.status(HttpStatus.OK)
         .body(this.caseService.getCaseDetails(caseNumber, userDetails));
