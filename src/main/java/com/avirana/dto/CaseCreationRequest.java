@@ -8,4 +8,5 @@ public class CaseCreationRequest {
   String caseType;
   String subType;
   String caseNumber;
+  Object payload;
 }

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -15,6 +16,7 @@ import lombok.Setter;
 @Table(name = "task_pipeline_steps")
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class TaskPipelineStepEntity extends BaseEntity {
 
   @Column(name = "task_id", nullable = false)
