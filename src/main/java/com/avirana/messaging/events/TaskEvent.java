@@ -11,4 +11,5 @@ public class TaskEvent {
   Integer caseId;
   Integer step;
   Object payload;
+  String remarks;
 }

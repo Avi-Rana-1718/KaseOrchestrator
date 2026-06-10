@@ -110,6 +110,7 @@ public class TaskManager {
     taskStepHistoryEntity.setPipelineId(taskEvent.getPipelineId());
     taskStepHistoryEntity.setCaseId(taskEvent.getCaseId());
     taskStepHistoryEntity.setSequenceNumber(taskEvent.getStep());
+    taskStepHistoryEntity.setRemarks(taskEvent.getRemarks());
     taskStepHistoryEntity.setPayload(objectMapper.writeValueAsString(taskEvent.getPayload()));
 
     taskStepHistoryRepository.save(taskStepHistoryEntity);

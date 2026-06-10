@@ -26,4 +26,7 @@ public class TaskStepHistoryEntity extends BaseEntity {
 
   @Column(name = "payload", nullable = true)
   private String payload;
+
+  @Column(name = "remarks")
+  private String remarks;
 }

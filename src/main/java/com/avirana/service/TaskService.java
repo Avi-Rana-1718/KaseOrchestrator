@@ -12,8 +12,10 @@ import com.avirana.repository.CaseRepository;
 import com.avirana.repository.TaskRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -45,11 +47,16 @@ public class TaskService {
   public String completeTask(TaskEvent taskEvent) {
     CaseEntity caseEntity = caseRepository.findById(taskEvent.getCaseId()).get();
 
+    if (caseEntity.getStatus() != CaseStatusEnum.ONHOLD) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Case is not waiting for external intervention");
+    }
+
     caseEntity.setStatus(CaseStatusEnum.ACTIVE);
     caseRepository.save(caseEntity);
 
     kafkaProducer.send(KafkaTopics.TASK_COMPLETED, taskEvent);
 
-    return "Compeleted event";
+    return "Completed event";
   }
 }
