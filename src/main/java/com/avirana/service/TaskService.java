@@ -1,8 +1,14 @@
 package com.avirana.service;
 
+import com.avirana.constants.KafkaTopics;
 import com.avirana.dto.TaskCreationRequest;
 import com.avirana.dto.TaskDto;
+import com.avirana.entity.CaseEntity;
 import com.avirana.entity.TaskEntity;
+import com.avirana.enums.CaseStatusEnum;
+import com.avirana.messaging.KafkaProducer;
+import com.avirana.messaging.events.TaskEvent;
+import com.avirana.repository.CaseRepository;
 import com.avirana.repository.TaskRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class TaskService {
 
   private final TaskRepository taskRepository;
+  private final CaseRepository caseRepository;
+  private final KafkaProducer kafkaProducer;
 
   @Transactional(readOnly = true)
   public List<TaskDto> getAllTasks() {
@@ -31,5 +39,17 @@ public class TaskService {
     taskRepository.save(taskEntity);
 
     return "Task successfully added";
+  }
+
+  @Transactional
+  public String completeTask(TaskEvent taskEvent) {
+    CaseEntity caseEntity = caseRepository.findById(taskEvent.getCaseId()).get();
+
+    caseEntity.setStatus(CaseStatusEnum.ACTIVE);
+    caseRepository.save(caseEntity);
+
+    kafkaProducer.send(KafkaTopics.TASK_COMPLETED, taskEvent);
+
+    return "Compeleted event";
   }
 }

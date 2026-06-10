@@ -2,6 +2,7 @@ package com.avirana.controller;
 
 import com.avirana.dto.TaskCreationRequest;
 import com.avirana.dto.TaskDto;
+import com.avirana.messaging.events.TaskEvent;
 import com.avirana.service.TaskService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,10 @@ public class TaskController {
   @PostMapping()
   public ResponseEntity<String> createTask(@RequestBody TaskCreationRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(taskService.createTask(request));
+  }
+
+  @PostMapping("/complete")
+  public ResponseEntity<String> completeTask(@RequestBody TaskEvent taskEvent) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(taskService.completeTask(taskEvent));
   }
 }

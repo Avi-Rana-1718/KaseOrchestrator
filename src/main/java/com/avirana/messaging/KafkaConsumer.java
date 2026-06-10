@@ -3,6 +3,7 @@ package com.avirana.messaging;
 import com.avirana.constants.KafkaTopics;
 import com.avirana.messaging.events.TaskEvent;
 import com.avirana.service.task.executor.TaskManager;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ public class KafkaConsumer {
   }
 
   @KafkaListener(topics = KafkaTopics.TASK_COMPLETED, groupId = "task-consumer")
-  public void taskCompleted(TaskEvent taskEvent) {
+  public void taskCompleted(TaskEvent taskEvent) throws JsonProcessingException {
     taskManager.increment(taskEvent);
   }
 }

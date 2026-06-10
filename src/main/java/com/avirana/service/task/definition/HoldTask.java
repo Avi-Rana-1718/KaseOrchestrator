@@ -26,8 +26,6 @@ public class HoldTask implements TaskDefinition {
     caseEntity.setStatus(CaseStatusEnum.ONHOLD);
     caseRepository.save(caseEntity);
 
-    log.info(caseEntity.getStatus().toString());
-
     return false;
   }
 

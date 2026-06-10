@@ -4,6 +4,7 @@ import com.avirana.constants.KafkaTopics;
 import com.avirana.entity.CaseEntity;
 import com.avirana.entity.TaskEntity;
 import com.avirana.entity.TaskPipelineStepEntity;
+import com.avirana.entity.TaskStepHistoryEntity;
 import com.avirana.enums.CaseStatusEnum;
 import com.avirana.enums.TaskTypeEnum;
 import com.avirana.messaging.KafkaProducer;
@@ -11,7 +12,10 @@ import com.avirana.messaging.events.TaskEvent;
 import com.avirana.repository.CaseRepository;
 import com.avirana.repository.TaskPipelineStepRepository;
 import com.avirana.repository.TaskRepository;
+import com.avirana.repository.TaskStepHistoryRepository;
 import com.avirana.service.task.definition.TaskDefinition;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +32,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class TaskManager {
   private final List<TaskDefinition> taskList;
   private Map<TaskTypeEnum, TaskDefinition> taskMap = new HashMap<>();
+  private final ObjectMapper objectMapper;
+
+  private final CaseRepository caseRepository;
   private final TaskRepository taskRepository;
   private final TaskPipelineStepRepository taskPipelineStepRepository;
-  private final CaseRepository caseRepository;
+  private final TaskStepHistoryRepository taskStepHistoryRepository;
+
   private final KafkaProducer kafkaProducer;
 
   @PostConstruct
@@ -69,10 +77,12 @@ public class TaskManager {
   }
 
   @Transactional
-  public void increment(TaskEvent taskEvent) {
+  public void increment(TaskEvent taskEvent) throws JsonProcessingException {
     Integer pipelineId = taskEvent.getPipelineId();
     Integer stepNumber = taskEvent.getStep();
     Integer caseId = taskEvent.getCaseId();
+
+    saveHistory(taskEvent);
 
     stepNumber++;
 
@@ -92,5 +102,16 @@ public class TaskManager {
     taskEvent.setStep(stepNumber);
 
     kafkaProducer.send(KafkaTopics.TASK_READY, taskEvent);
+  }
+
+  private void saveHistory(TaskEvent taskEvent) throws JsonProcessingException {
+    TaskStepHistoryEntity taskStepHistoryEntity = new TaskStepHistoryEntity();
+    taskStepHistoryEntity.setTaskId(taskEvent.getTaskId());
+    taskStepHistoryEntity.setPipelineId(taskEvent.getPipelineId());
+    taskStepHistoryEntity.setCaseId(taskEvent.getCaseId());
+    taskStepHistoryEntity.setSequenceNumber(taskEvent.getStep());
+    taskStepHistoryEntity.setPayload(objectMapper.writeValueAsString(taskEvent.getPayload()));
+
+    taskStepHistoryRepository.save(taskStepHistoryEntity);
   }
 }
