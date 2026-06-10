@@ -8,10 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SendCommunicationTask implements TaskDefinition {
   @Override
-  public void execute(TaskEvent taskEvent) {
+  public boolean execute(TaskEvent taskEvent) {
     SendCommunicationPayload payload = (SendCommunicationPayload) taskEvent.getPayload();
 
     System.out.println("Trigger comms");
+
+    return true;
   }
 
   @Override

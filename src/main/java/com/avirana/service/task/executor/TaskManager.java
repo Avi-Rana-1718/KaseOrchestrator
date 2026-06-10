@@ -45,18 +45,27 @@ public class TaskManager {
         });
   }
 
-  @Transactional(readOnly = true)
+  @Transactional()
   public void execute(TaskEvent payload) {
     TaskEntity taskEntity = taskRepository.findByIdAndIsActiveTrue(payload.getTaskId());
     TaskTypeEnum taskType = TaskTypeEnum.valueOf(taskEntity.getIdentifier());
+
+    Integer stepNumber = payload.getStep();
+    Integer caseId = payload.getCaseId();
+
+    if (stepNumber == 0) {
+      CaseEntity caseEntity = caseRepository.findById(caseId).get();
+      caseEntity.setStatus(CaseStatusEnum.ACTIVE);
+      caseRepository.save(caseEntity);
+    }
 
     if (!taskMap.containsKey(taskType)) throw new Error(taskType + " not implemented!");
 
     log.info("Handled event: " + taskType);
 
-    taskMap.get(taskType).execute(payload);
+    boolean shouldContinue = taskMap.get(taskType).execute(payload);
 
-    kafkaProducer.send(KafkaTopics.TASK_COMPLETED, payload);
+    if (shouldContinue) kafkaProducer.send(KafkaTopics.TASK_COMPLETED, payload);
   }
 
   @Transactional

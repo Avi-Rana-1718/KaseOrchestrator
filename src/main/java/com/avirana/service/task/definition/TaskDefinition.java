@@ -4,7 +4,7 @@ import com.avirana.enums.TaskTypeEnum;
 import com.avirana.messaging.events.TaskEvent;
 
 public interface TaskDefinition {
-  public void execute(TaskEvent payload);
+  public boolean execute(TaskEvent payload);
 
   public TaskTypeEnum getType();
 }
